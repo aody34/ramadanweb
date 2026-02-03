@@ -1,0 +1,205 @@
+/* ============================================
+   CIBRO (Daily Reflection) Styles
+   ============================================ */
+
+.section-cibro {
+    background:
+        radial-gradient(ellipse at center top, var(--color-primary-glow) 0%, transparent 50%),
+        var(--bg-primary);
+}
+
+.cibro-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+    text-align: center;
+}
+
+/* Arabic Ayah */
+.cibro-ayah {
+    font-family: var(--font-arabic);
+    font-size: clamp(2rem, 6vw, 4rem);
+    line-height: 1.8;
+    color: var(--color-text);
+    padding: var(--spacing-xl);
+    position: relative;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.cibro-ayah::before,
+.cibro-ayah::after {
+    content: '۝';
+    position: absolute;
+    font-size: 1.5rem;
+    color: var(--color-accent);
+    opacity: 0.6;
+}
+
+.cibro-ayah::before {
+    top: 0;
+    right: 0;
+}
+
+.cibro-ayah::after {
+    bottom: 0;
+    left: 0;
+}
+
+/* Surah Reference */
+.cibro-reference {
+    font-size: 0.9rem;
+    color: var(--color-accent);
+    letter-spacing: 0.1em;
+    opacity: 0;
+}
+
+/* Somali Reflection */
+.cibro-reflection {
+    max-width: 700px;
+    margin: 0 auto;
+    font-size: 1.125rem;
+    line-height: 2;
+    color: var(--color-text-muted);
+    text-align: justify;
+    direction: ltr;
+    padding: var(--spacing-lg);
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    position: relative;
+    overflow: hidden;
+}
+
+.cibro-reflection::before {
+    content: '"';
+    position: absolute;
+    top: -20px;
+    right: 20px;
+    font-size: 8rem;
+    font-family: Georgia, serif;
+    color: var(--color-accent);
+    opacity: 0.1;
+    line-height: 1;
+}
+
+/* Reflection text paragraphs for scroll animation */
+.reflection-paragraph {
+    opacity: 0;
+    filter: blur(4px);
+    transition: opacity 0.8s ease, filter 0.8s ease;
+}
+
+.reflection-paragraph.active {
+    opacity: 1;
+    filter: blur(0);
+}
+
+/* Typewriter cursor */
+.typewriter-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.2em;
+    background: var(--color-accent);
+    margin-left: 2px;
+    animation: blink 0.8s infinite;
+    vertical-align: middle;
+}
+
+@keyframes blink {
+
+    0%,
+    50% {
+        opacity: 1;
+    }
+
+    51%,
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Daily Dua */
+.cibro-dua {
+    margin-top: var(--spacing-xl);
+    padding: var(--spacing-lg);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--bg-tertiary) 100%);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+.cibro-dua::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+}
+
+.dua-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--color-accent);
+    margin-bottom: var(--spacing-md);
+}
+
+.dua-arabic {
+    font-family: var(--font-arabic);
+    font-size: clamp(1.25rem, 4vw, 2rem);
+    line-height: 1.8;
+    color: var(--color-text);
+}
+
+/* Blur to Focus Animation Classes */
+.blur-hidden {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translateY(20px);
+}
+
+.blur-visible {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+}
+
+/* Character reveal for typewriter */
+.char {
+    opacity: 0;
+    display: inline;
+}
+
+.char.visible {
+    opacity: 1;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    .cibro-ayah {
+        font-size: 1.75rem;
+        padding: var(--spacing-md);
+    }
+
+    .cibro-reflection {
+        font-size: 1rem;
+        padding: var(--spacing-md);
+        text-align: right;
+    }
+
+    .cibro-dua {
+        padding: var(--spacing-md);
+    }
+
+    .dua-arabic {
+        font-size: 1.25rem;
+    }
+}
