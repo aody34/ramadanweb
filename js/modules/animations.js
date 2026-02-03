@@ -68,6 +68,90 @@ export function typewriterEffect(element, text, options = {}) {
 }
 
 /**
+ * Word-by-word reveal for Arabic Duas (cinematic breathing effect)
+ * @param {HTMLElement} element - Target element
+ * @param {string} text - Arabic text to reveal
+ * @param {Object} options - Animation options
+ */
+export function wordByWordReveal(element, text, options = {}) {
+    const {
+        wordDelay = 0.4,
+        duration = 0.8,
+        delay = 0,
+        blur = 8,
+        ease = 'power2.out'
+    } = options;
+
+    // Clear existing content
+    element.innerHTML = '';
+    element.style.opacity = '1';
+
+    // Split by words (Arabic words are space-separated)
+    const words = text.split(' ').filter(w => w.trim());
+
+    words.forEach((word, i) => {
+        const span = document.createElement('span');
+        span.className = 'word';
+        span.textContent = word + ' ';
+        span.style.opacity = '0';
+        span.style.filter = `blur(${blur}px)`;
+        span.style.display = 'inline-block';
+        element.appendChild(span);
+    });
+
+    // Animate words
+    const wordElements = element.querySelectorAll('.word');
+
+    return gsap.to(wordElements, {
+        opacity: 1,
+        filter: 'blur(0px)',
+        duration,
+        stagger: wordDelay,
+        delay,
+        ease
+    });
+}
+
+/**
+ * Line-by-line reveal for paragraphs
+ * @param {HTMLElement} element - Container with lines
+ * @param {Object} options - Animation options
+ */
+export function lineByLineReveal(element, options = {}) {
+    const {
+        lineDelay = 0.3,
+        duration = 0.6,
+        y = 20,
+        ease = 'power2.out'
+    } = options;
+
+    // Split text into lines (by sentences or newlines)
+    const text = element.textContent;
+    const lines = text.split(/[.،]/).filter(l => l.trim());
+
+    element.innerHTML = '';
+
+    lines.forEach((line, i) => {
+        const p = document.createElement('p');
+        p.className = 'reflection-line';
+        p.textContent = line.trim() + (i < lines.length - 1 ? '.' : '');
+        p.style.opacity = '0';
+        p.style.transform = `translateY(${y}px)`;
+        element.appendChild(p);
+    });
+
+    const lineElements = element.querySelectorAll('.reflection-line');
+
+    return gsap.to(lineElements, {
+        opacity: 1,
+        y: 0,
+        duration,
+        stagger: lineDelay,
+        ease
+    });
+}
+
+/**
  * Blur to focus reveal effect
  * @param {HTMLElement} element - Target element
  * @param {Object} options - Animation options
@@ -319,6 +403,8 @@ export function loaderExit(loader, app) {
 
 export default {
     typewriterEffect,
+    wordByWordReveal,
+    lineByLineReveal,
     blurToFocusReveal,
     ayahStaggerReveal,
     setupScrollTrigger,

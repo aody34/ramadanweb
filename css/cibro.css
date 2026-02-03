@@ -85,14 +85,15 @@
 
 /* Reflection text paragraphs for scroll animation */
 .reflection-paragraph {
-    opacity: 0;
-    filter: blur(4px);
-    transition: opacity 0.8s ease, filter 0.8s ease;
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, filter, transform;
 }
 
-.reflection-paragraph.active {
-    opacity: 1;
-    filter: blur(0);
+.reflection-paragraph:last-child {
+    margin-bottom: 0;
 }
 
 /* Typewriter cursor */
@@ -155,6 +156,14 @@
     font-size: clamp(1.25rem, 4vw, 2rem);
     line-height: 1.8;
     color: var(--color-text);
+    min-height: 2em;
+}
+
+/* Word reveal animation for Duas */
+.word {
+    display: inline-block;
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, filter;
 }
 
 /* Blur to Focus Animation Classes */
@@ -174,10 +183,17 @@
 .char {
     opacity: 0;
     display: inline;
+    transition: opacity 0.05s ease;
 }
 
 .char.visible {
     opacity: 1;
+}
+
+/* Reflection line animation */
+.reflection-line {
+    transition: all 0.6s ease;
+    margin-bottom: var(--spacing-sm);
 }
 
 /* ============================================

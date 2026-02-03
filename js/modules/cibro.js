@@ -1,9 +1,10 @@
 /**
  * Cibro (Daily Reflection) Module
+ * Enhanced with cinematic GSAP animations
  */
 
 import { getCurrentRamadanDay, isRamadan } from './ramadan.js';
-import { typewriterEffect, blurToFocusReveal, createCibroTimeline } from './animations.js';
+import { typewriterEffect, wordByWordReveal, setupScrollTrigger } from './animations.js';
 
 let reflectionsData = null;
 
@@ -59,7 +60,7 @@ export async function getDailyReflection(day = null) {
 }
 
 /**
- * Render Cibro section
+ * Render Cibro section with enhanced animations
  * @param {Object} containers - DOM element containers
  */
 export async function renderCibro(containers) {
@@ -72,58 +73,140 @@ export async function renderCibro(containers) {
         return;
     }
 
-    // Set content
+    // Set initial content (hidden)
     ayahEl.textContent = reflection.ayah;
     referenceEl.textContent = `— ${reflection.surah}`;
 
-    // Store reflection text for typewriter
-    reflectionEl.dataset.text = reflection.reflection;
-    reflectionEl.textContent = '';
+    // Split reflection into paragraphs for scroll animation
+    const sentences = reflection.reflection.split('. ').filter(s => s.trim());
+    reflectionEl.innerHTML = sentences.map((sentence, i) =>
+        `<p class="reflection-paragraph" data-index="${i}">${sentence.trim()}${i < sentences.length - 1 ? '.' : ''}</p>`
+    ).join('');
 
-    // Set dua
-    duaEl.textContent = reflection.dua;
+    // Store dua for word-by-word animation
+    duaEl.dataset.dua = reflection.dua;
+    duaEl.textContent = '';
 
-    // Trigger animations
+    // Trigger cinematic animations
     animateCibro(containers, reflection);
 }
 
 /**
- * Animate Cibro section
+ * Animate Cibro section with cinematic effects
  * @param {Object} containers - DOM containers
  * @param {Object} reflection - Reflection data
  */
 function animateCibro(containers, reflection) {
     const { ayahEl, referenceEl, reflectionEl, duaEl } = containers;
 
-    // Create timeline
+    // Create master timeline
     const tl = gsap.timeline({
-        defaults: { ease: 'power3.out' }
+        defaults: { ease: 'power2.out' }
     });
 
-    // Ayah blur to focus
+    // 1. Ayah: Slow blur-to-focus reveal
     tl.fromTo(ayahEl,
-        { opacity: 0, y: 30, filter: 'blur(10px)' },
-        { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.5 }
+        {
+            opacity: 0,
+            y: 40,
+            filter: 'blur(15px)',
+            scale: 0.95
+        },
+        {
+            opacity: 1,
+            y: 0,
+            filter: 'blur(0px)',
+            scale: 1,
+            duration: 2,
+            ease: 'power2.out'
+        }
     )
-        // Reference fade
+        // 2. Reference: Subtle fade
         .fromTo(referenceEl,
-            { opacity: 0 },
-            { opacity: 1, duration: 0.8 },
-            '-=0.5'
+            { opacity: 0, y: 10 },
+            { opacity: 1, y: 0, duration: 0.8 },
+            '-=0.8'
         )
-        // Typewriter for reflection
+        // 3. Reflection paragraphs: Staggered reveal
         .add(() => {
-            typewriterEffect(reflectionEl, reflection.reflection, {
-                speed: 0.025,
-                showCursor: true
-            });
+            const paragraphs = reflectionEl.querySelectorAll('.reflection-paragraph');
+            gsap.fromTo(paragraphs,
+                {
+                    opacity: 0,
+                    y: 30,
+                    filter: 'blur(4px)'
+                },
+                {
+                    opacity: 1,
+                    y: 0,
+                    filter: 'blur(0px)',
+                    duration: 1,
+                    stagger: 0.4,
+                    ease: 'power2.out'
+                }
+            );
+
+            // Setup ScrollTrigger for cinematic focus
+            setTimeout(() => {
+                setupCibroScrollTrigger(paragraphs);
+            }, 1500);
         }, '+=0.5')
-        // Dua reveal
+        // 4. Dua: Word-by-word breathing reveal
+        .add(() => {
+            if (duaEl.dataset.dua) {
+                wordByWordReveal(duaEl, duaEl.dataset.dua, {
+                    wordDelay: 0.3,
+                    duration: 0.6,
+                    blur: 6
+                });
+            }
+        }, '+=2')
+        // 5. Dua container reveal
         .fromTo(duaEl.parentElement,
-            { opacity: 0, y: 30 },
-            { opacity: 1, y: 0, duration: 1 },
-            '+=3'
+            { opacity: 0, y: 20, scale: 0.98 },
+            { opacity: 1, y: 0, scale: 1, duration: 1 },
+            '-=1'
         );
+}
+
+/**
+ * Setup ScrollTrigger for Cibro paragraphs
+ * Creates cinematic focus effect on scroll
+ * @param {NodeList} paragraphs - Paragraph elements
+ */
+function setupCibroScrollTrigger(paragraphs) {
+    paragraphs.forEach((para, index) => {
+        // Fade in on scroll
+        gsap.to(para, {
+            scrollTrigger: {
+                trigger: para,
+                start: 'top 75%',
+                end: 'top 40%',
+                scrub: 0.8,
+                toggleActions: 'play reverse play reverse'
+            },
+            opacity: 1,
+            filter: 'blur(0px)',
+            scale: 1,
+            color: '#f5f5f5',
+            ease: 'power2.inOut'
+        });
+
+        // Fade out as it scrolls past
+        gsap.to(para, {
+            scrollTrigger: {
+                trigger: para,
+                start: 'top 25%',
+                end: 'top 5%',
+                scrub: 0.8
+            },
+            opacity: 0.4,
+            filter: 'blur(2px)',
+            scale: 0.98,
+            color: '#6b7280',
+            ease: 'power2.inOut'
+        });
+    });
 }
 
 /**
@@ -153,3 +236,4 @@ export default {
     renderCibro,
     initCibro
 };
+
