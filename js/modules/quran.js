@@ -128,8 +128,9 @@ export async function openSurahViewer(surahNumber) {
     // Animate verses
     setTimeout(() => {
         ayahStaggerReveal(versesEl.querySelectorAll('.verse'), {
-            stagger: 0.1,
-            duration: 0.6
+            stagger: 0.05,
+            duration: 0.6,
+            scroller: '.surah-viewer-content'
         });
     }, 300);
 }

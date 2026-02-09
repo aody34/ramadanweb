@@ -187,10 +187,10 @@ export function blurToFocusReveal(element, options = {}) {
  */
 export function ayahStaggerReveal(elements, options = {}) {
     const {
-        stagger = 0.3,
+        stagger = 0.05,
         duration = 0.8,
-        delay = 0,
-        y = 30
+        y = 30,
+        scroller = null
     } = options;
 
     gsap.set(elements, {
@@ -198,13 +198,23 @@ export function ayahStaggerReveal(elements, options = {}) {
         y
     });
 
-    return gsap.to(elements, {
-        opacity: 1,
-        y: 0,
-        duration,
-        stagger,
-        delay,
-        ease: 'power3.out'
+    ScrollTrigger.batch(elements, {
+        scroller: scroller,
+        start: "top 90%",
+        onEnter: batch => gsap.to(batch, {
+            opacity: 1,
+            y: 0,
+            duration,
+            stagger,
+            overwrite: true,
+            ease: 'power3.out'
+        }),
+        onLeaveBack: batch => gsap.to(batch, {
+            opacity: 0,
+            y,
+            duration: 0.4,
+            overwrite: true
+        })
     });
 }
 
