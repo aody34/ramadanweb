@@ -10,23 +10,23 @@
     --bg-tertiary: #1a1a1a;
     --bg-card: rgba(255, 255, 255, 0.03);
     --bg-glass: rgba(6, 78, 59, 0.1);
-    
+
     --color-primary: #064e3b;
     --color-primary-light: #065f46;
     --color-primary-glow: rgba(6, 78, 59, 0.4);
-    
+
     --color-accent: #d4af37;
     --color-accent-light: #e8c547;
     --color-accent-glow: rgba(212, 175, 55, 0.3);
-    
+
     --color-text: #f5f5f5;
     --color-text-muted: #9ca3af;
     --color-text-dim: #6b7280;
-    
+
     /* Typography */
     --font-arabic: 'Amiri Quran', 'Scheherazade New', serif;
     --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    
+
     /* Spacing */
     --spacing-xs: 0.5rem;
     --spacing-sm: 1rem;
@@ -34,13 +34,13 @@
     --spacing-lg: 2rem;
     --spacing-xl: 3rem;
     --spacing-2xl: 5rem;
-    
+
     /* Border Radius */
     --radius-sm: 8px;
     --radius-md: 12px;
     --radius-lg: 20px;
     --radius-full: 100px;
-    
+
     /* Transitions */
     --transition-fast: 0.2s ease;
     --transition-base: 0.3s ease;
@@ -49,7 +49,9 @@
 }
 
 /* Reset */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -68,6 +70,7 @@ body {
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.6s ease, color 0.6s ease;
 }
 
 /* Selection */
@@ -132,8 +135,17 @@ body {
 }
 
 @keyframes pulse {
-    0%, 100% { transform: scale(1); opacity: 0.8; }
-    50% { transform: scale(1.1); opacity: 1; }
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
 }
 
 /* ============================================
@@ -231,7 +243,7 @@ body {
     justify-content: center;
     position: relative;
     padding: var(--spacing-2xl) var(--spacing-lg);
-    background: 
+    background:
         radial-gradient(ellipse at top, var(--color-primary-glow) 0%, transparent 50%),
         radial-gradient(ellipse at bottom right, var(--color-accent-glow) 0%, transparent 40%),
         var(--bg-primary);
@@ -376,28 +388,28 @@ body {
     .nav {
         padding: var(--spacing-sm);
     }
-    
+
     .nav-links {
         gap: var(--spacing-sm);
     }
-    
+
     .nav-link {
         font-size: 0.8rem;
         padding: var(--spacing-xs);
     }
-    
+
     .ramadan-countdown {
         gap: var(--spacing-sm);
     }
-    
+
     .countdown-item {
         padding: var(--spacing-sm);
     }
-    
+
     .countdown-value {
         font-size: 1.75rem;
     }
-    
+
     .section {
         padding: var(--spacing-xl) var(--spacing-sm);
     }
