@@ -51,6 +51,12 @@ async function init() {
             // Setup scroll animations
             setupScrollAnimations();
 
+            // Slide header in
+            animateHeader();
+
+            // Wire up PWA install button
+            setupInstallPrompt();
+
             console.log('Hadiye initialized successfully ✨');
 
         } catch (error) {
@@ -172,6 +178,91 @@ function setupScrollAnimations() {
 
     // Cinematic paragraph focus for reflections
     setupScrollTrigger('.reflection-paragraph');
+}
+
+/**
+ * Animate header slide-down with GSAP
+ */
+function animateHeader() {
+    const header = document.getElementById('app-header');
+    if (!header) return;
+
+    gsap.to(header, {
+        y: 0,
+        duration: 0.8,
+        ease: 'power3.out',
+        delay: 0.3
+    });
+}
+
+/**
+ * PWA Install Prompt Handler
+ * Captures the beforeinstallprompt event and wires up the install button
+ */
+let deferredPrompt = null;
+
+function setupInstallPrompt() {
+    const installBtn = document.getElementById('install-btn');
+    if (!installBtn) return;
+
+    // Capture the install prompt event
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent the default mini-infobar
+        e.preventDefault();
+        deferredPrompt = e;
+
+        // Show the install button with GSAP animation
+        installBtn.style.display = 'flex';
+        gsap.fromTo(installBtn,
+            { opacity: 0, scale: 0.8, x: 20 },
+            {
+                opacity: 1,
+                scale: 1,
+                x: 0,
+                duration: 0.6,
+                ease: 'back.out(1.7)',
+                onComplete: () => {
+                    // Add pulse class after entrance
+                    installBtn.classList.add('pulse');
+                }
+            }
+        );
+    });
+
+    // Handle install button click
+    installBtn.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+
+        // Stop the pulse
+        installBtn.classList.remove('pulse');
+
+        // Show the install prompt
+        deferredPrompt.prompt();
+
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`Install choice: ${outcome}`);
+
+        // Reset - prompt can only be used once
+        deferredPrompt = null;
+
+        // Hide button with animation
+        gsap.to(installBtn, {
+            opacity: 0,
+            scale: 0.8,
+            duration: 0.3,
+            ease: 'power2.in',
+            onComplete: () => {
+                installBtn.style.display = 'none';
+            }
+        });
+    });
+
+    // Hide button if app is already installed
+    window.addEventListener('appinstalled', () => {
+        deferredPrompt = null;
+        installBtn.style.display = 'none';
+        console.log('Hadiye installed successfully ✨');
+    });
 }
 
 // Initialize app
