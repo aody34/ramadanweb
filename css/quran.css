@@ -188,8 +188,7 @@
 
 .verse {
     display: inline;
-    opacity: 0;
-    transform: translateY(10px);
+    will-change: opacity, transform;
 }
 
 .verse-number {

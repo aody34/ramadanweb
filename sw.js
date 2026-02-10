@@ -3,7 +3,7 @@
  * Provides offline functionality for the PWA
  */
 
-const CACHE_NAME = 'hadiye-v1.0.0';
+const CACHE_NAME = 'hadiye-v2.0.0';
 const OFFLINE_URL = '/offline.html';
 
 // Assets to cache immediately

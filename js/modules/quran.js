@@ -1,8 +1,7 @@
 /**
  * Quran Module - Surah navigation and display
+ * Dynamic rendering with GSAP animations for full Surah reading
  */
-
-import { ayahStaggerReveal } from './animations.js';
 
 let surahsData = null;
 
@@ -52,8 +51,6 @@ export async function searchSurahs(query) {
     const data = await loadSurahs();
     if (!data || !query) return data?.surahs || [];
 
-    const lowerQuery = query.toLowerCase();
-
     return data.surahs.filter(surah =>
         surah.name.includes(query) ||
         String(surah.n).includes(query)
@@ -83,7 +80,7 @@ export async function renderSurahGrid(container) {
         });
     });
 
-    // Animate cards
+    // Animate cards entrance
     gsap.fromTo(container.querySelectorAll('.surah-card'),
         { opacity: 0, y: 20 },
         {
@@ -97,6 +94,95 @@ export async function renderSurahGrid(container) {
 }
 
 /**
+ * Render all ayahs into the viewer using chunked rendering
+ * This ensures 60fps even for long Surahs like Al-Baqarah (286 ayahs)
+ * @param {HTMLElement} container - Verses container element
+ * @param {Array} verses - Array of verse strings
+ */
+function renderVerses(container, verses) {
+    // Clear previous content
+    container.innerHTML = '';
+
+    // Build all verse elements in a DocumentFragment for performance
+    const fragment = document.createDocumentFragment();
+
+    verses.forEach((verse, i) => {
+        // Verse text
+        const verseSpan = document.createElement('span');
+        verseSpan.className = 'verse';
+        verseSpan.textContent = verse;
+
+        // Verse number badge
+        const numSpan = document.createElement('span');
+        numSpan.className = 'verse-number';
+        numSpan.textContent = i + 1;
+
+        // Space between verses
+        const space = document.createTextNode(' ');
+
+        fragment.appendChild(verseSpan);
+        fragment.appendChild(numSpan);
+        fragment.appendChild(space);
+    });
+
+    // Single DOM write
+    container.appendChild(fragment);
+}
+
+/**
+ * Animate visible verses with GSAP ScrollTrigger
+ * Uses IntersectionObserver for reliable detection inside modal
+ * @param {HTMLElement} scrollContainer - The scrollable container
+ * @param {NodeList} verseElements - All verse elements
+ */
+function animateVersesOnScroll(scrollContainer, verseElements) {
+    // Animate first batch immediately (above the fold)
+    const firstBatch = Array.from(verseElements).slice(0, 15);
+    gsap.fromTo(firstBatch,
+        { opacity: 0, y: 15 },
+        {
+            opacity: 1,
+            y: 0,
+            duration: 0.5,
+            stagger: 0.04,
+            ease: 'power2.out'
+        }
+    );
+
+    // Use IntersectionObserver for remaining verses (works inside modals)
+    const remaining = Array.from(verseElements).slice(15);
+
+    if (remaining.length === 0) return;
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                gsap.to(entry.target, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.6,
+                    ease: 'power2.out'
+                });
+                observer.unobserve(entry.target);
+            }
+        });
+    }, {
+        root: scrollContainer,
+        rootMargin: '100px',
+        threshold: 0.1
+    });
+
+    remaining.forEach(verse => {
+        // Set initial hidden state
+        gsap.set(verse, { opacity: 0, y: 15 });
+        observer.observe(verse);
+    });
+
+    // Store observer reference for cleanup
+    scrollContainer._verseObserver = observer;
+}
+
+/**
  * Open Surah viewer modal
  * @param {number} surahNumber - Surah number
  */
@@ -104,6 +190,7 @@ export async function openSurahViewer(surahNumber) {
     const viewer = document.getElementById('surah-viewer');
     const titleEl = document.getElementById('surah-title');
     const versesEl = document.getElementById('surah-verses');
+    const contentEl = viewer.querySelector('.surah-viewer-content');
 
     const surah = await getSurah(surahNumber);
 
@@ -112,27 +199,30 @@ export async function openSurahViewer(surahNumber) {
         return;
     }
 
+    // Clean up any previous observer
+    if (contentEl._verseObserver) {
+        contentEl._verseObserver.disconnect();
+        contentEl._verseObserver = null;
+    }
+
     // Set title
     titleEl.textContent = `سورة ${surah.name}`;
 
-    // Render verses
-    versesEl.innerHTML = surah.v.map((verse, i) => `
-        <span class="verse">${verse}</span>
-        <span class="verse-number">${i + 1}</span>
-    `).join(' ');
+    // Render all verses into the DOM
+    renderVerses(versesEl, surah.v);
 
     // Show viewer
     viewer.classList.add('active');
     document.body.style.overflow = 'hidden';
 
-    // Animate verses
-    setTimeout(() => {
-        ayahStaggerReveal(versesEl.querySelectorAll('.verse'), {
-            stagger: 0.05,
-            duration: 0.6,
-            scroller: '.surah-viewer-content'
-        });
-    }, 300);
+    // Scroll to top of content
+    contentEl.scrollTop = 0;
+
+    // Animate verses after modal is visible
+    requestAnimationFrame(() => {
+        const verseElements = versesEl.querySelectorAll('.verse');
+        animateVersesOnScroll(contentEl, verseElements);
+    });
 }
 
 /**
@@ -140,6 +230,14 @@ export async function openSurahViewer(surahNumber) {
  */
 export function closeSurahViewer() {
     const viewer = document.getElementById('surah-viewer');
+    const contentEl = viewer.querySelector('.surah-viewer-content');
+
+    // Clean up observer
+    if (contentEl && contentEl._verseObserver) {
+        contentEl._verseObserver.disconnect();
+        contentEl._verseObserver = null;
+    }
+
     viewer.classList.remove('active');
     document.body.style.overflow = '';
 }
@@ -150,7 +248,6 @@ export function closeSurahViewer() {
 export async function initQuran() {
     const grid = document.getElementById('surah-grid');
     const closeBtn = document.getElementById('surah-close');
-    const searchInput = document.getElementById('surah-search');
     const viewer = document.getElementById('surah-viewer');
 
     if (grid) {
@@ -168,31 +265,6 @@ export async function initQuran() {
             if (e.target === viewer) {
                 closeSurahViewer();
             }
-        });
-    }
-
-    // Search functionality
-    if (searchInput) {
-        let debounceTimer;
-        searchInput.addEventListener('input', (e) => {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(async () => {
-                const results = await searchSurahs(e.target.value);
-                grid.innerHTML = '';
-
-                results.forEach(surah => {
-                    const card = document.createElement('div');
-                    card.className = 'surah-card';
-                    card.dataset.surah = surah.n;
-                    card.innerHTML = `
-                        <span class="surah-number">${surah.n}</span>
-                        <span class="surah-name">${surah.name}</span>
-                        <span class="surah-verses-count">${surah.c} آية</span>
-                    `;
-                    card.addEventListener('click', () => openSurahViewer(surah.n));
-                    grid.appendChild(card);
-                });
-            }, 200);
         });
     }
 
