@@ -1,11 +1,11 @@
 /**
  * Ramadan Module - Handles countdown and day tracking
- * Ramadan 2026: February 17 - March 18 (approximate)
+ * Ramadan 2026: February 18 - March 19 (approximate)
  */
 
 // Ramadan 2026 dates (adjust as needed for actual moon sighting)
-const RAMADAN_START = new Date('2026-02-17T00:00:00');
-const RAMADAN_END = new Date('2026-03-18T23:59:59');
+const RAMADAN_START = new Date('2026-02-18T00:00:00');
+const RAMADAN_END = new Date('2026-03-19T23:59:59');
 
 /**
  * Check if current date is during Ramadan
@@ -23,7 +23,7 @@ export function isRamadan() {
 export function getDaysUntilRamadan() {
     const now = new Date();
     if (now >= RAMADAN_START) return 0;
-    
+
     const diff = RAMADAN_START - now;
     return Math.ceil(diff / (1000 * 60 * 60 * 24));
 }
@@ -34,11 +34,11 @@ export function getDaysUntilRamadan() {
  */
 export function getCurrentRamadanDay() {
     if (!isRamadan()) return null;
-    
+
     const now = new Date();
     const diff = now - RAMADAN_START;
     const day = Math.floor(diff / (1000 * 60 * 60 * 24)) + 1;
-    
+
     return Math.min(day, 30);
 }
 
@@ -48,13 +48,13 @@ export function getCurrentRamadanDay() {
  */
 export function getCountdown() {
     const now = new Date();
-    
+
     if (now >= RAMADAN_START) {
         return { days: 0, hours: 0, minutes: 0, seconds: 0 };
     }
-    
+
     const diff = RAMADAN_START - now;
-    
+
     return {
         days: Math.floor(diff / (1000 * 60 * 60 * 24)),
         hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
@@ -72,7 +72,7 @@ export function getRamadanStatus() {
     const day = getCurrentRamadanDay();
     const countdown = getCountdown();
     const daysUntil = getDaysUntilRamadan();
-    
+
     // Determine phase
     let phase = 'before';
     if (inRamadan) {
@@ -80,7 +80,7 @@ export function getRamadanStatus() {
         else if (day <= 20) phase = 'forgiveness'; // Second 10 days - Forgiveness
         else phase = 'salvation';             // Last 10 days - Salvation from Hellfire
     }
-    
+
     return {
         isRamadan: inRamadan,
         currentDay: day,
@@ -108,7 +108,7 @@ export function formatCountdown(countdown) {
  */
 export function renderRamadanStatus(container) {
     const status = getRamadanStatus();
-    
+
     if (status.isRamadan) {
         // During Ramadan - show day tracker
         const phaseLabels = {
@@ -116,7 +116,7 @@ export function renderRamadanStatus(container) {
             forgiveness: 'Tobankaas Dambi Dhaafka',
             salvation: 'Tobankaas Badbaadinta'
         };
-        
+
         container.innerHTML = `
             <span class="ramadan-label">${phaseLabels[status.phase]}</span>
             <h1 class="ramadan-title">رَمَضَان مُبَارَك</h1>
@@ -134,7 +134,7 @@ export function renderRamadanStatus(container) {
     } else {
         // Before Ramadan - show countdown
         const { days, hours, minutes, seconds } = status.countdown;
-        
+
         container.innerHTML = `
             <span class="ramadan-label">Ramadaan waa imanaysaa</span>
             <h1 class="ramadan-title">رَمَضَان كَرِيم</h1>
@@ -157,7 +157,7 @@ export function renderRamadanStatus(container) {
                 </div>
             </div>
         `;
-        
+
         // Start countdown timer
         startCountdownTimer();
     }
@@ -169,17 +169,17 @@ export function renderRamadanStatus(container) {
 function startCountdownTimer() {
     setInterval(() => {
         const countdown = getCountdown();
-        
+
         const daysEl = document.getElementById('days');
         const hoursEl = document.getElementById('hours');
         const minutesEl = document.getElementById('minutes');
         const secondsEl = document.getElementById('seconds');
-        
+
         if (daysEl) daysEl.textContent = countdown.days;
         if (hoursEl) hoursEl.textContent = countdown.hours;
         if (minutesEl) minutesEl.textContent = countdown.minutes;
         if (secondsEl) secondsEl.textContent = countdown.seconds;
-        
+
     }, 1000);
 }
 
